@@ -1,0 +1,51 @@
+{
+  "name": "@coinflowlabs/react-native-fraud",
+  "version": "0.1.0",
+  "description": "Coinflow fraud protection for React Native — one opaque header, backed by Coinflow's native iOS and Android fraud SDKs.",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "nativeSdkVersions": {
+    "ios": "0.2.0",
+    "android": "0.1.0"
+  },
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/coinflow-labs-us/coinflow-react-native-fraud"
+  },
+  "keywords": [
+    "react-native",
+    "coinflow",
+    "fraud",
+    "device-fingerprint",
+    "typescript"
+  ],
+  "files": [
+    "build/**/*",
+    "android/build.gradle",
+    "android/src/**/*",
+    "ios/**/*",
+    "CoinflowReactNativeFraud.podspec",
+    "app.plugin.js",
+    "README.md"
+  ],
+  "scripts": {
+    "clean": "rimraf build && rimraf tsconfig.tsbuildinfo",
+    "build": "npm run clean && tsc",
+    "test": "jest"
+  },
+  "peerDependencies": {
+    "react": ">=16",
+    "react-native": ">=0.66.0"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^10.4.0",
+    "@swc/jest": "^0.2.39",
+    "@types/jest": "^29.5.14",
+    "@types/react": "^19.1.1",
+    "expo": "~54.0.10",
+    "jest": "^29.7.0",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.6.3"
+  }
+}
