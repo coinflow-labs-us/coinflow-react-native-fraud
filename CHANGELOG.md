@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1
+
+- Pins the Android SDK to 0.1.1, which declares its appcompat dependency. React Native apps already
+  include appcompat, so this only keeps the pinned versions in step.
+
 ## 0.1.0
 
 - Initial release of the unified Coinflow fraud-protection SDK for React Native.
