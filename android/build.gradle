@@ -28,18 +28,38 @@ android {
     }
 }
 
-repositories {
-    google()
-    mavenCentral()
-}
-
-// Some of the native SDK's signal SDKs are served outside Maven Central. The app resolves this module's
-// transitive deps with its own repositories, so they have to be visible project-wide.
-rootProject.allprojects {
+// Apps that centralize repositories in settings.gradle apply the cash.coinflow.fraud.repositories settings
+// plugin, which supplies every repository. A repository declared here would fail their build under
+// FAIL_ON_PROJECT_REPOS, so declare none.
+if (!gradle.ext.has('cash.coinflow.fraud.repositories')) {
     repositories {
-        maven { url 'https://jitpack.io' }
-        maven { url 'https://maven.fpregistry.io/releases' }
-        maven { url 'https://us-central1-maven.pkg.dev/verisoul/android' }
+        google()
+        mavenCentral()
+    }
+
+    // Some of the native SDK's signal SDKs are served outside Maven Central. The app resolves this
+    // module's transitive deps with its own repositories, so they have to be visible project-wide. Each
+    // serves only its signal SDK's group, so the app's other dependencies are never requested from it.
+    def signalRepositories = [
+        'https://jitpack.io': 'com.github.nsure-ai',
+        'https://maven.fpregistry.io/releases': 'com.fingerprint.android',
+        'https://us-central1-maven.pkg.dev/verisoul/android': 'ai.verisoul',
+    ]
+    rootProject.allprojects {
+        repositories {
+            signalRepositories.each { repositoryUrl, signalGroup ->
+                // Expo's config plugin already writes these into the app's allprojects block, and a
+                // second exclusiveContent for the same group excludes it from both, so nothing serves it.
+                def declared = withType(MavenArtifactRepository).any {
+                    it.url.toString().replaceAll('/$', '') == repositoryUrl
+                }
+                if (declared) return
+                exclusiveContent {
+                    forRepository { maven { url repositoryUrl } }
+                    filter { includeGroup signalGroup }
+                }
+            }
+        }
     }
 }
 

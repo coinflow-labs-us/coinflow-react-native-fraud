@@ -9,12 +9,14 @@ const {nativeSdkVersions} = JSON.parse(
 const IOS_SDK_GIT_URL =
   'https://github.com/coinflow-labs-us/coinflow-swift-fraud.git';
 
-// VerisoulSDK's resource-bundle target declares iOS 14.0, below current Xcode's minimum (15.0), which
-// fails the build. Lift only Verisoul's targets to this package's own minimum.
+// A signal SDK's resource-bundle target declares iOS 14.0, below current Xcode's minimum (15.0), which
+// fails the build. Lift every pod below this package's own minimum to it. The README's bare React Native
+// step shows the same block.
 const MIN_IOS = '15.1';
-const VERISOUL_DEPLOYMENT_TARGET_FIX = `    installer.pods_project.targets.each do |target|
-      next unless target.name.start_with?('VerisoulSDK')
+const DEPLOYMENT_TARGET_MARKER = `['IPHONEOS_DEPLOYMENT_TARGET'].to_f < ${MIN_IOS}`;
+const DEPLOYMENT_TARGET_FIX = `    installer.pods_project.targets.each do |target|
       target.build_configurations.each do |build_config|
+        next unless build_config.build_settings${DEPLOYMENT_TARGET_MARKER}
         build_config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '${MIN_IOS}'
       end
     end
@@ -22,11 +24,20 @@ const VERISOUL_DEPLOYMENT_TARGET_FIX = `    installer.pods_project.targets.each 
 
 // `expo run:android` passes --configure-on-demand, which skips repos a library adds through
 // rootProject.allprojects (android/build.gradle). Write them into the app's own allprojects block.
+// Each repo serves only its signal SDK's group, so the app's other dependencies are never requested from
+// it. Same groups as android/build.gradle and the cash.coinflow.fraud.repositories settings plugin.
 const MAVEN_REPOS = [
-  'https://jitpack.io',
-  'https://maven.fpregistry.io/releases',
-  'https://us-central1-maven.pkg.dev/verisoul/android',
-].map(url => ({marker: url, block: `    maven { url '${url}' }\n`}));
+  {url: 'https://jitpack.io', group: 'com.github.nsure-ai'},
+  {url: 'https://maven.fpregistry.io/releases', group: 'com.fingerprint.android'},
+  {url: 'https://us-central1-maven.pkg.dev/verisoul/android', group: 'ai.verisoul'},
+].map(({url, group}) => ({
+  marker: url,
+  block: `    exclusiveContent {
+      forRepository { maven { url '${url}' } }
+      filter { includeGroup '${group}' }
+    }
+`,
+}));
 const MAVEN_LOCAL_REPO = {marker: 'mavenLocal()', block: '    mavenLocal()\n'};
 const ALLPROJECTS_REPOSITORIES_ANCHOR =
   /(allprojects\s*\{\s*\n\s*repositories\s*\{\s*\n)/;
@@ -70,8 +81,8 @@ class CoinflowFraudPodfile {
     );
   }
 
-  static addVerisoulDeploymentTargetFix(contents) {
-    if (contents.includes("start_with?('VerisoulSDK')")) return contents;
+  static addDeploymentTargetFix(contents) {
+    if (contents.includes(DEPLOYMENT_TARGET_MARKER)) return contents;
     NativeFileAnchor.assert({
       contents,
       anchor: POST_INSTALL_ANCHOR,
@@ -79,7 +90,7 @@ class CoinflowFraudPodfile {
     });
     return contents.replace(
       POST_INSTALL_ANCHOR,
-      `$1${VERISOUL_DEPLOYMENT_TARGET_FIX}`
+      `$1${DEPLOYMENT_TARGET_FIX}`
     );
   }
 }
@@ -145,7 +156,7 @@ const withCoinflowFraudIos = (config, {localSdkRoot}) =>
       const contents = fs.readFileSync(podfile, 'utf8');
       fs.writeFileSync(
         podfile,
-        CoinflowFraudPodfile.addVerisoulDeploymentTargetFix(
+        CoinflowFraudPodfile.addDeploymentTargetFix(
           CoinflowFraudPodfile.addPods({contents, localSdkPath})
         )
       );

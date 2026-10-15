@@ -4,6 +4,10 @@
 
 - Pins the Android SDK to 0.1.1, which declares its appcompat dependency. React Native apps already
   include appcompat, so this only keeps the pinned versions in step.
+- Expo plugin: vendor-neutral `post_install` deployment-target fix (the same block as the README).
+- Android: the signal SDKs' Maven repos serve only their own groups, and the module declares no
+  repositories when the app applies the `cash.coinflow.fraud.repositories` settings plugin, so
+  `FAIL_ON_PROJECT_REPOS` builds work.
 
 ## 0.1.0
 

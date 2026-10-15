@@ -65,8 +65,8 @@ The package autolinks a native module that wraps the native SDKs: the `CoinflowF
   Then add this at the top of your `post_install do |installer|` block:
   ```ruby
   installer.pods_project.targets.each do |target|
-    next unless target.name.start_with?('VerisoulSDK')
     target.build_configurations.each do |build_config|
+      next unless build_config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_f < 15.1
       build_config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.1'
     end
   end
@@ -76,9 +76,34 @@ The package autolinks a native module that wraps the native SDKs: the `CoinflowF
   itself. Apps that centralize repositories in `settings.gradle` through
   `dependencyResolutionManagement { repositoriesMode … }` are the exception. With
   `FAIL_ON_PROJECT_REPOS` the build fails, and with `PREFER_SETTINGS` the repos are ignored. Those
-  apps add the repos listed in the
-  [Android SDK README](https://github.com/coinflow-labs-us/coinflow/tree/main/lib/android-fraud#install-gradle)
-  to `settings.gradle` themselves.
+  apps add Coinflow's `cash.coinflow.fraud.repositories` settings plugin to the existing
+  `pluginManagement` and `plugins` blocks in `android/settings.gradle`. It adds the repos in settings,
+  and the module then declares no repositories of its own, so both modes build. The plugin is on Maven
+  Central, so `pluginManagement` must list `mavenCentral()`:
+  ```groovy
+  pluginManagement {
+    repositories {
+      gradlePluginPortal()
+      mavenCentral()
+    }
+  }
+
+  plugins {
+    id("cash.coinflow.fraud.repositories") version "0.1.1"
+  }
+  ```
+
+## Example app
+
+`example/` is a minimal Expo app that wraps its root in `CoinflowProtectionProvider` and attaches the
+`x-device-id` header to a request. It installs this package from npm.
+
+```bash
+cd example
+cp example.env .env
+npm install
+npx expo run:ios   # or: npx expo run:android
+```
 
 ## Layout
 

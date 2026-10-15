@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "Coinflow Fraud Example",
+    "slug": "coinflow-react-native-fraud-example",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "newArchEnabled": true,
+    "ios": {
+      "bundleIdentifier": "cash.coinflow.fraud.example"
+    },
+    "android": {
+      "package": "cash.coinflow.fraud.example"
+    },
+    "plugins": [
+      "@coinflowlabs/react-native-fraud",
+      "./plugins/withSceneLifecycle"
+    ]
+  }
+}
