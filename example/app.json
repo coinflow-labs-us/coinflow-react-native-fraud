@@ -4,7 +4,6 @@
     "slug": "coinflow-react-native-fraud-example",
     "version": "1.0.0",
     "orientation": "portrait",
-    "newArchEnabled": true,
     "ios": {
       "bundleIdentifier": "cash.coinflow.fraud.example"
     },
