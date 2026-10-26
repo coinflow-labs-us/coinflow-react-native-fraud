@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.2
+
+- Pins the iOS SDK to 0.2.1, which widens its device signal SDK's version range so apps can pin an
+  older compatible version in their Podfile.
+- Expo plugin: a `pod 'CoinflowFraud'` line left at an earlier release tag (prebuild without `--clean`)
+  moves to the current tag, so `pod install` no longer fails on upgrade.
+
 ## 0.1.1
 
 - Pins the Android SDK to 0.1.1, which declares its appcompat dependency. React Native apps already

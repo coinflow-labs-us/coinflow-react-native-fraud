@@ -8,6 +8,9 @@ const {nativeSdkVersions} = JSON.parse(
 
 const IOS_SDK_GIT_URL =
   'https://github.com/coinflow-labs-us/coinflow-swift-fraud.git';
+const RELEASED_POD_TAG = new RegExp(
+  `(pod 'CoinflowFraud', :git => '${IOS_SDK_GIT_URL.replace(/\./g, '\\.')}', :tag => ')[^']*(')`
+);
 
 // A signal SDK's resource-bundle target declares iOS 14.0, below current Xcode's minimum (15.0), which
 // fails the build. Lift every pod below this package's own minimum to it. The README's bare React Native
@@ -64,8 +67,9 @@ class CoinflowFraudPodfile {
   }
 
   // The native SDK isn't on CocoaPods trunk, so point the app's Podfile at its source. A pod the app
-  // already declares is left alone.
-  static addPods({contents, localSdkPath}) {
+  // already declares is left alone, except that a line at an older release tag moves to this one.
+  static addPods({contents: original, localSdkPath}) {
+    const contents = CoinflowFraudPodfile.retagReleasedPod(original);
     const missing = CoinflowFraudPodfile.podLines({localSdkPath}).filter(
       ({name}) => !contents.includes(`pod '${name}'`)
     );
@@ -78,6 +82,15 @@ class CoinflowFraudPodfile {
     return contents.replace(
       EXPO_MODULES_ANCHOR,
       `$1${missing.map(({line}) => `${line}\n`).join('')}`
+    );
+  }
+
+  // The bridge podspec pins CoinflowFraud to exactly nativeSdkVersions.ios, so a Podfile kept from an
+  // earlier release (prebuild without --clean) would fail pod install at its old tag.
+  static retagReleasedPod(contents) {
+    return contents.replace(
+      RELEASED_POD_TAG,
+      `$1v${nativeSdkVersions.ios}$2`
     );
   }
 

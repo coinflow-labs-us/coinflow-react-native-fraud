@@ -64,6 +64,33 @@ end
     expect(CoinflowFraudPodfile.addPods({contents: declared})).toBe(declared);
   });
 
+  test('moves a native SDK line kept from an earlier release to the current tag', () => {
+    const releasedLine = tag =>
+      `  pod 'CoinflowFraud', :git => 'https://github.com/coinflow-labs-us/coinflow-swift-fraud.git', :tag => '${tag}'\n`;
+    const declared = podfile.replace(
+      '  use_expo_modules!\n',
+      `  use_expo_modules!\n${releasedLine(`v${faker.system.semver()}`)}`
+    );
+
+    const result = CoinflowFraudPodfile.addPods({contents: declared});
+
+    expect(result).toBe(
+      podfile.replace(
+        '  use_expo_modules!\n',
+        `  use_expo_modules!\n${releasedLine(`v${packageJson.nativeSdkVersions.ios}`)}`
+      )
+    );
+  });
+
+  test('leaves a native SDK line on another git ref alone', () => {
+    const declared = podfile.replace(
+      '  use_expo_modules!\n',
+      `  use_expo_modules!\n  pod 'CoinflowFraud', :git => 'https://github.com/coinflow-labs-us/coinflow-swift-fraud.git', :branch => '${faker.git.branch()}'\n`
+    );
+
+    expect(CoinflowFraudPodfile.addPods({contents: declared})).toBe(declared);
+  });
+
   test('adds the deployment-target fix at the top of post_install', () => {
     const result = CoinflowFraudPodfile.addDeploymentTargetFix(podfile);
 

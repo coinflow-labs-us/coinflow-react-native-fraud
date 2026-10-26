@@ -60,7 +60,7 @@ The package autolinks a native module that wraps the native SDKs: the `CoinflowF
     `npx expo run:android` needs this because it builds with `--configure-on-demand`.
 - **Bare React Native (iOS):** add this line to your Podfile target:
   ```ruby
-  pod 'CoinflowFraud', :git => 'https://github.com/coinflow-labs-us/coinflow-swift-fraud.git', :tag => 'v0.2.0'
+  pod 'CoinflowFraud', :git => 'https://github.com/coinflow-labs-us/coinflow-swift-fraud.git', :tag => 'v0.2.1'
   ```
   Then add this at the top of your `post_install do |installer|` block:
   ```ruby

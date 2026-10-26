@@ -1,11 +1,11 @@
 {
   "name": "@coinflowlabs/react-native-fraud",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Coinflow fraud protection for React Native — one opaque header, backed by Coinflow's native iOS and Android fraud SDKs.",
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "nativeSdkVersions": {
-    "ios": "0.2.0",
+    "ios": "0.2.1",
     "android": "0.1.1"
   },
   "license": "Apache-2.0",
